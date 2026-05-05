@@ -1,29 +1,22 @@
 <?php
-
-include 'connection.php';
-
 session_start();
+require_once 'connection.php';
+
+if (empty($_SESSION['login'])) {
+    header('Location: login.php');
+    exit;
+}
 
 $user = $_SESSION['login'];
-$ref = $_REQUEST['ref'];
-
-$sql = "SELECT quantite_d_article FROM pannier WHERE mail_login = '".$user."'
-AND reference = '".$ref."'";
-$table = $connection->query($sql);
-echo $sql;
-
-while ($ligne = $table->fetch()){
-
-    $quantite = $ligne['quantite_d_article'] + 1;
+$ref = $_REQUEST['ref'] ?? '';
+if ($ref === '') {
+    header('Location: cart.php');
+    exit;
 }
 
-if (isset($quantite)){
-    $sql = "UPDATE `pannier` SET `quantite_d_article`= ".$quantite."
-    WHERE mail_login = '".$user."' AND reference = '".$ref."'";
-    $connection->exec($sql);
-}
+$stmt = $connection->prepare('UPDATE pannier SET quantite_d_article = quantite_d_article + 1 WHERE mail_login = :login AND reference = :ref');
+$stmt->execute([':login' => $user, ':ref' => $ref]);
 
-
-header("location: afficher_panier.php");
-
+header('Location: cart.php');
+exit;
 ?>

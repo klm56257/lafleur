@@ -1,9 +1,5 @@
 <?php
-
 session_start();
-
 session_destroy();
-
-header ("location: accueil.php");
-
-?>
+header('Location: index.php');
+exit;

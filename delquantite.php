@@ -1,34 +1,34 @@
 <?php
-
-include 'connection.php';
-
 session_start();
+require_once 'connection.php';
+
+if (empty($_SESSION['login'])) {
+    header('Location: login.php');
+    exit;
+}
 
 $user = $_SESSION['login'];
-$ref = $_REQUEST['ref'];
+$ref = $_REQUEST['ref'] ?? '';
+if ($ref === '') {
+    header('Location: cart.php');
+    exit;
+}
 
-$sql = "SELECT quantite_d_article FROM pannier WHERE mail_login = '".$user."'
-AND reference = '".$ref."'";
-$table = $connection->query($sql);
-echo $sql;
+$stmt = $connection->prepare('SELECT quantite_d_article FROM pannier WHERE mail_login = :login AND reference = :ref');
+$stmt->execute([':login' => $user, ':ref' => $ref]);
+$ligne = $stmt->fetch();
 
-while ($ligne = $table->fetch()){
-
+if ($ligne) {
     $quantite = $ligne['quantite_d_article'] - 1;
-}
-
-if (isset($quantite)){
-
-    if ($quantite == 0){
-        $sql = "DELETE FROM `pannier` WHERE mail_login = '".$_SESSION['login']."' AND reference = '".$ref."'";
-    } else{
-        $sql = "UPDATE `pannier` SET `quantite_d_article`= ".$quantite."
-        WHERE mail_login = '".$user."' AND reference = '".$ref."'";
+    if ($quantite <= 0) {
+        $delete = $connection->prepare('DELETE FROM pannier WHERE mail_login = :login AND reference = :ref');
+        $delete->execute([':login' => $user, ':ref' => $ref]);
+    } else {
+        $update = $connection->prepare('UPDATE pannier SET quantite_d_article = :quantite WHERE mail_login = :login AND reference = :ref');
+        $update->execute([':quantite' => $quantite, ':login' => $user, ':ref' => $ref]);
     }
-    $connection->exec($sql);
 }
 
-
-header("location: afficher_panier.php");
-
+header('Location: cart.php');
+exit;
 ?>

@@ -1,29 +1,20 @@
+﻿# La Fleur
 
-# Project LaFleur
+Projet e-commerce PHP pour une boutique de fleurs.
 
-LaFleur est une site d'e-commerce de fleur, on peut y retrouver de nombreuses variétés de plantes en tout genre. 
+## Contenu
 
-Ce projet est un projet d'école reutilisant toutes les connaissances acquises durant les 2 ans de BTS SIO
+- Code PHP du site
+- Base de données MySQL dump dans `baselafleur.sql`
 
+## Installation
 
-## Authors
+1. Placer le projet dans le dossier de votre serveur web.
+2. Importer `baselafleur.sql` dans MySQL.
+3. Vérifier les paramètres de connexion dans `connection.php`.
+4. Ouvrir le site via votre serveur local.
 
-- [@armanceau2](https://www.github.com/armanceau2)
-- [@ApDnoze](https://www.github.com/ApDnoze)
-- [@Sky_day](https://www.github.com/Sky_day)
-- [@luarredondo](https://www.github.com/luarredondo)
-- [@Mathias002](https://www.github.com/Mathias002)
-- [@P3psHy](https://www.github.com/P3psHy)
-- [@eltraore](https://www.github.com/eltraore)
+## Notes
 
-## Color Reference
-
-| Color             | Hex                                                                |
-| ----------------- | ------------------------------------------------------------------ |
-| Vert pale | ![#88B494](https://via.placeholder.com/10/88B494?text=+) #88B494 |
-| Noir | ![#1E1E1E](https://via.placeholder.com/10/1E1E1E?text=+) #1E1E1E |
-
-
-![Logo](assets\icons\logoLaFleur2.PNG)
-
-
+- Les comptes administrateur et client sont gérés via les tables `administrateur` et `utilisateur`.
+- Le panier utilise la table `pannier`.

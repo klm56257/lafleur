@@ -1,18 +1,23 @@
 <?php
+session_start();
+if (empty($_SESSION['admin'])) {
+    header('Location: login.php');
+    exit;
+}
+require_once 'connection.php';
 
+$codeCategorie = $_POST['codeCategorie'] ?? '';
+$nomCategorie = $_POST['nomCategorie'] ?? '';
 
-include 'connection.php';
+if ($codeCategorie !== '' && $nomCategorie !== '') {
+    $stmt = $connection->prepare('INSERT INTO categorie (code_de_la_categorie, nom_de_la_categorie) VALUES (:codeCateg, :nomCateg)');
+    $stmt->bindParam(':nomCateg', $nomCategorie);
+    $stmt->bindParam(':codeCateg', $codeCategorie);
+    $stmt->execute();
+}
 
-
-
-$stmt = $connection->prepare("INSERT categorie VALUES (:codeCateg, :nomCateg)");
-$stmt->bindParam(':nomCateg', $_REQUEST["nomCategorie"]);
-$stmt->bindParam(':codeCateg', $_REQUEST["codeCategorie"]);
-
-
-$stmt->execute();
-
-header("location: BackOffice.php");       
+header('Location: admin_dashboard.php');
+exit;
 ?>
 
 

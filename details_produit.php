@@ -1,27 +1,28 @@
 
-<?php 
-require 'connection.php';
-include ("header/header.php"); 
-$ref = $_REQUEST['categ'];
+<?php
+header('Location: index.php');
+exit;
 $sql = 'SELECT *  FROM produit WHERE reference like "%' . $ref . '%"' ;
 $table = $connection->query($sql);
 $ligne = $table->fetch();
 $photo = $ligne['photo'];
 $titre = $ligne['designation'];
 $prix = $ligne['prix'];
+$photoPath = 'IMG/' . $photo . '.jpg';
+$serverPhotoPath = __DIR__ . '/IMG/' . $photo . '.jpg';
+if (!file_exists($serverPhotoPath) || empty($photo)) {
+    $photoPath = 'IMG/exemple.jpg';
+}
 ?>
 <div class="container-fluid detail-container">
 
     <div class="row">
     <div class="col-md-4 col-xs-12 text-center">
             <div class="photo">
-                <?php echo "<img src='img/$photo.jpg'>";?>
+                <?php echo "<img src='$photoPath' alt='Photo du produit' onerror=\"this.onerror=null;this.src='IMG/exemple.jpg'\">";?>
             </div>
             <div class="previ text-center">
-                <?php echo "<img src='img/$photo.jpg'>";
-                echo "<img src='img/$photo.jpg'>";
-                echo "<img src='img/$photo.jpg'>";
-                echo "<img src='img/$photo.jpg'>";?>
+                <?php echo "<img src='$photoPath' alt='Aperçu du produit' onerror=\"this.onerror=null;this.src='IMG/exemple.jpg'\">";?>
             </div>
 
         </div>
@@ -96,8 +97,5 @@ $prix = $ligne['prix'];
         document.getElementById("mySidenav").style.display = "none";
       }
       </script>
-<?php 
-include "footer.html";
-?>
 
 

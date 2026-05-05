@@ -1,13 +1,15 @@
 <?php 
 
 try {
-    $dns ='mysql:host=localhost;dbname=baselafleur';
+    $dns ='mysql:host=localhost;dbname=baselafleur;charset=utf8mb4';
     $uttilisateur ='root';
     $motDePasse ='';
-    $connection = new PDO( $dns, $uttilisateur, $motDePasse );
-    $connection->query("SET NAMES utf8") ;
-}catch (BadFunctionCallException $e){
-    echo "connection à MySQL inpossible : ", $e->getMessage();
+    $connection = new PDO($dns, $uttilisateur, $motDePasse, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    ]);
+}catch (PDOException $e){
+    echo "connection à MySQL impossible : ", $e->getMessage();
     die();
 }
 

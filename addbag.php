@@ -1,37 +1,31 @@
 <?php
-
-include 'connection.php';
-
 session_start();
+require_once 'connection.php';
+
+if (empty($_SESSION['login'])) {
+    header('Location: login.php');
+    exit;
+}
 
 $user = $_SESSION['login'];
-$quantite = 0;
-$ref = $_REQUEST['ref'];
-
-$sql = "SELECT reference, quantite_d_article FROM pannier WHERE mail_login = '".$user."'
-AND reference = '".$ref."'";
-$table = $connection->query($sql);
-echo $sql;
-
-while ($ligne = $table->fetch()){
-
-    if ($ligne['reference'] =$ref){
-        $quantite = $ligne['quantite_d_article'] + 1;
-    }
+$ref = $_REQUEST['ref'] ?? '';
+if ($ref === '') {
+    header('Location: index.php');
+    exit;
 }
 
-if ($quantite != 0){
-    $sql = "UPDATE `pannier` SET `quantite_d_article`= ".$quantite."
-    WHERE mail_login = '".$user."' AND reference = '".$ref."'";
+$stmt = $connection->prepare('SELECT quantite_d_article FROM pannier WHERE mail_login = :login AND reference = :ref');
+$stmt->execute([':login' => $user, ':ref' => $ref]);
+$ligne = $stmt->fetch();
 
-}else {
-    $quantite = 1;
-    $sql = "INSERT INTO `pannier` (`mail_login`, `reference`, `quantite_d_article`)
-    VALUES ('".$user."', '".$ref."', ".$quantite.")";
+if ($ligne) {
+    $stmt = $connection->prepare('UPDATE pannier SET quantite_d_article = quantite_d_article + 1 WHERE mail_login = :login AND reference = :ref');
+    $stmt->execute([':login' => $user, ':ref' => $ref]);
+} else {
+    $stmt = $connection->prepare('INSERT INTO pannier (mail_login, reference, quantite_d_article) VALUES (:login, :ref, 1)');
+    $stmt->execute([':login' => $user, ':ref' => $ref]);
 }
 
-$connection->exec($sql);
-
-header("location: afficher_panier.php");
-
+header('Location: cart.php');
+exit;
 ?>
