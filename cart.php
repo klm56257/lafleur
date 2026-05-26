@@ -4,6 +4,7 @@ if (!isset($_SESSION['login'])) {
     header('Location: login.php');
     exit;
 }
+
 require_once 'connection.php';
 
 $login = $_SESSION['login'];

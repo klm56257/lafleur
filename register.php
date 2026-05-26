@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->fetchColumn() > 0) {
             $error = 'Cette adresse email est déjà utilisée.';
         } else {
-            $stmt = $connection->prepare('INSERT INTO utilisateur (mail_login, mot_de_passe_user, nom, prenom, adresse, tel) VALUES (:email, :mdp, :nom, :prenom, :adresse, :tel)');
+            $stmt = $connection->prepare('INSERT INTO utilisateur (mail_login, mot_de_passe_user, nom, prenom, adresse, tel, role) VALUES (:email, :mdp, :nom, :prenom, :adresse, :tel, :role)');
             $stmt->execute([
                 ':email' => $email,
                 ':mdp' => sha1($password),
@@ -27,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':prenom' => $prenom,
                 ':adresse' => $adresse,
                 ':tel' => $tel,
+                ':role' => 'user',
             ]);
             $_SESSION['login'] = $email;
             header('Location: index.php');

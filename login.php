@@ -20,21 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user) {
             $_SESSION['login'] = $user['mail_login'];
+            $role = $user['role'] ?? ($user['mail_login'] === 'admin' ? 'admin' : 'user');
+            if ($role === 'admin') {
+                $_SESSION['admin'] = true;
+                header('Location: admin_dashboard.php');
+                exit;
+            }
             header('Location: index.php');
-            exit;
-        }
-
-        $stmt = $connection->prepare('SELECT * FROM administrateur WHERE username_admin = :login AND mot_de_passe_admin = :mdp');
-        $stmt->execute([
-            ':login' => $loginInput,
-            ':mdp' => $mdpHash,
-        ]);
-        $admin = $stmt->fetch();
-
-        if ($admin) {
-            $_SESSION['login'] = $admin['username_admin'];
-            $_SESSION['admin'] = true;
-            header('Location: admin_dashboard.php');
             exit;
         }
 

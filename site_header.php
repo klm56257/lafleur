@@ -41,17 +41,19 @@ $isAdmin = !empty($_SESSION['admin']);
                 </ul>
                 <ul class="navbar-nav mb-2 mb-lg-0">
                     <?php if ($loggedIn): ?>
-                        <?php if (!$isAdmin): ?>
+                        <?php if ($isAdmin): ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="cart.php">Panier</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="admin_dashboard.php">Admin</a>
+                            </li>
+                        <?php else: ?>
                             <li class="nav-item">
                                 <a class="nav-link" href="profile.php">Mon compte</a>
                             </li>
-                        <?php endif; ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="cart.php">Panier</a>
-                        </li>
-                        <?php if ($isAdmin): ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="admin_dashboard.php">Admin</a>
+                                <a class="nav-link" href="cart.php">Panier</a>
                             </li>
                         <?php endif; ?>
                         <li class="nav-item">
