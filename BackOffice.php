@@ -196,7 +196,7 @@ $codes_promo = $connection->query('SELECT * FROM code_promo ORDER BY code')->fet
                                         <td><?php echo htmlspecialchars($code['code']); ?></td>
                                         <td><?php echo $code['reduction']; ?>%</td>
                                         <td><?php echo $code['date_expiration']; ?></td>
-                                        <td><?php echo $code['nb_utilisations']; ?>/<?php echo $code['max_utilisations']; ?></td>
+                                        <td><?php echo $code['max_utilisations']; ?> max</td>
                                     </tr>
                                 <?php endforeach; ?>
                                 </tbody>

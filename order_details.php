@@ -37,6 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$admin) {
 $itemsStmt = $connection->prepare('SELECT lc.*, p.designation, p.photo FROM ligne_commande lc JOIN produit p ON lc.reference = p.reference WHERE lc.commande_id = :id');
 $itemsStmt->execute([':id' => $orderId]);
 $items = $itemsStmt->fetchAll();
+
+$subtotal = 0;
+foreach ($items as $item) {
+    $subtotal += $item['prix_unitaire'] * $item['quantite'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -57,6 +62,11 @@ $items = $itemsStmt->fetchAll();
                 <p><strong>Date :</strong> <?php echo date('d/m/Y H:i', strtotime($order['date_commande'])); ?></p>
                 <p><strong>État :</strong> <?php echo htmlspecialchars($order['etat']); ?></p>
                 <p><strong>Adresse de livraison :</strong> <?php echo htmlspecialchars($order['adresse_livraison'] ?? 'Non renseignée'); ?></p>
+                <?php if (!empty($order['bon_de_reduction'])): ?>
+                    <p><strong>Code promo utilisé :</strong> <?php echo htmlspecialchars($order['bon_de_reduction']); ?></p>
+                    <p><strong>Sous-total avant réduction :</strong> <?php echo number_format($subtotal, 2, ',', ' '); ?> €</p>
+                    <p class="text-success"><strong>Réduction :</strong> -<?php echo number_format($subtotal - $order['total'], 2, ',', ' '); ?> €</p>
+                <?php endif; ?>
                 <p><strong>Montant total :</strong> <?php echo number_format($order['total'], 2, ',', ' '); ?> €</p>
             </div>
         </div>
