@@ -9,6 +9,9 @@ if (empty($_SESSION['login'])) {
 
 $login = $_SESSION['login'];
 $error = '';
+$codePromo = '';
+$reduction = 0;
+$montantReduit = 0;
 
 $cartStmt = $connection->prepare(
     'SELECT pa.reference, pa.quantite_d_article, p.designation, p.prix, p.photo, p.quantite_en_stock
@@ -39,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ccv = trim($_POST['ccv'] ?? '');
     $titulaire = trim($_POST['id'] ?? '');
     $adresseLivraison = trim($_POST['livraison'] ?? '');
+    $codePromo = strtoupper(trim($_POST['code_promo'] ?? ''));
 
     if ($card === '' || $ccv === '' || $titulaire === '' || $adresseLivraison === '') {
         $error = 'Veuillez remplir tous les champs du formulaire de commande.';
@@ -51,18 +55,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    $total = $subtotal;
+    if ($error === '' && $codePromo !== '') {
+        $promoStmt = $connection->prepare(
+            'SELECT * FROM code_promo WHERE code = ? AND date_expiration >= CURDATE() AND nb_utilisations < max_utilisations'
+        );
+        $promoStmt->execute([$codePromo]);
+        $promo = $promoStmt->fetch();
+
+        if (!$promo) {
+            $error = 'Code promo invalide ou expiré.';
+            $codePromo = '';
+        } else {
+            $reduction = $promo['reduction'];
+            $montantReduit = $subtotal * ($reduction / 100);
+        }
+    }
+
+    $total = $subtotal - $montantReduit;
 
     if ($error === '') {
         try {
             $connection->beginTransaction();
+
             $orderStmt = $connection->prepare(
-                'INSERT INTO commande (mail_login, etat, adresse_livraison, total) VALUES (:login, :etat, :adresse, :total)'
+                'INSERT INTO commande (mail_login, etat, adresse_livraison, bon_de_reduction, total) VALUES (:login, :etat, :adresse, :bon, :total)'
             );
             $orderStmt->execute([
                 ':login' => $login,
                 ':etat' => 'Confirmé',
                 ':adresse' => $adresseLivraison,
+                ':bon' => $codePromo ?: null,
                 ':total' => $total,
             ]);
             $orderId = $connection->lastInsertId();
@@ -79,19 +101,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
             }
 
+            if ($codePromo !== '') {
+                $updatePromo = $connection->prepare(
+                    'UPDATE code_promo SET nb_utilisations = nb_utilisations + 1 WHERE code = ?'
+                );
+                $updatePromo->execute([$codePromo]);
+            }
+
             $clearStmt = $connection->prepare('DELETE FROM pannier WHERE mail_login = :login');
             $clearStmt->execute([':login' => $login]);
+
             $connection->commit();
             header('Location: order_details.php?id=' . $orderId);
             exit;
         } catch (Exception $e) {
             $connection->rollBack();
-            $error = 'Une erreur est survenue lors de l’enregistrement de la commande. Veuillez réessayer.';
+            $error = 'Une erreur est survenue lors de l\'enregistrement de la commande. Veuillez réessayer.';
         }
     }
 }
 
-    $total = $subtotal;
+$total = $subtotal - $montantReduit;
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -118,21 +148,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <form method="post" action="commande.php">
                             <div class="mb-3">
                                 <label for="card" class="form-label">Numéro de carte</label>
-                                <input type="text" class="form-control" id="card" name="card" value="" required>
+                                <input type="text" class="form-control" id="card" name="card" required>
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="ccv" class="form-label">CCV</label>
-                                    <input type="text" class="form-control" id="ccv" name="ccv" value="" required>
+                                    <input type="text" class="form-control" id="ccv" name="ccv" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="id" class="form-label">Titulaire de la carte</label>
-                                    <input type="text" class="form-control" id="id" name="id" value="" required>
+                                    <input type="text" class="form-control" id="id" name="id" required>
                                 </div>
                             </div>
                             <div class="mb-3 mt-3">
                                 <label for="livraison" class="form-label">Adresse de livraison</label>
                                 <input type="text" class="form-control" id="livraison" name="livraison" value="<?php echo htmlspecialchars($adresseLivraison); ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="code_promo" class="form-label">Code promo</label>
+                                <input type="text" class="form-control" id="code_promo" name="code_promo" value="<?php echo htmlspecialchars($codePromo); ?>" placeholder="Entrez votre code promo (optionnel)">
                             </div>
                             <button type="submit" class="btn btn-success">Confirmer ma commande</button>
                         </form>
@@ -157,6 +191,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php endforeach; ?>
                         </div>
                         <p class="mb-1">Sous-total : <strong><?php echo number_format($subtotal, 2, ',', ' '); ?> €</strong></p>
+                        <?php if ($montantReduit > 0): ?>
+                            <p class="mb-1 text-success">
+                                Code promo (<?php echo $reduction; ?>%) : 
+                                -<?php echo number_format($montantReduit, 2, ',', ' '); ?> €
+                            </p>
+                        <?php endif; ?>
                         <h3>Total : <?php echo number_format($total, 2, ',', ' '); ?> €</h3>
                     </div>
                 </div>
