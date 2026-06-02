@@ -9,7 +9,6 @@ if (empty($_SESSION['admin'])) {
 $code = strtoupper(trim($_POST['code']));
 $reduction = $_POST['reduction'];
 $date_expiration = $_POST['date_expiration'];
-$max_utilisations = $_POST['max_utilisations'];
 
 $check = $connection->prepare('SELECT code FROM code_promo WHERE code = ?');
 $check->execute([$code]);
@@ -19,7 +18,7 @@ if ($check->fetch()) {
     exit;
 }
 
-$stmt = $connection->prepare('INSERT INTO code_promo (code, reduction, date_expiration, max_utilisations) VALUES (?, ?, ?, ?)');
-$stmt->execute([$code, $reduction, $date_expiration, $max_utilisations]);
+$stmt = $connection->prepare('INSERT INTO code_promo (code, reduction, date_expiration) VALUES (?, ?, ?)');
+$stmt->execute([$code, $reduction, $date_expiration]);
 header('Location: BackOffice.php');
 exit;

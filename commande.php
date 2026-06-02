@@ -57,13 +57,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($error === '' && $codePromo !== '') {
         $promoStmt = $connection->prepare(
-            'SELECT * FROM code_promo WHERE code = ? AND date_expiration >= CURDATE() AND nb_utilisations < max_utilisations'
+            'SELECT cp.* FROM code_promo cp
+             LEFT JOIN utilisation_code_promo ucp ON cp.code = ucp.code AND ucp.mail_login = ?
+             WHERE cp.code = ? AND cp.date_expiration >= CURDATE() AND ucp.mail_login IS NULL'
         );
-        $promoStmt->execute([$codePromo]);
+        $promoStmt->execute([$login, $codePromo]);
         $promo = $promoStmt->fetch();
 
         if (!$promo) {
-            $error = 'Code promo invalide ou expiré.';
+            $error = 'Code promo invalide, expiré ou déjà utilisé.';
             $codePromo = '';
         } else {
             $reduction = $promo['reduction'];
@@ -102,10 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if ($codePromo !== '') {
-                $updatePromo = $connection->prepare(
-                    'UPDATE code_promo SET nb_utilisations = nb_utilisations + 1 WHERE code = ?'
+                $insertUtilisation = $connection->prepare(
+                    'INSERT INTO utilisation_code_promo (mail_login, code) VALUES (?, ?)'
                 );
-                $updatePromo->execute([$codePromo]);
+                $insertUtilisation->execute([$login, $codePromo]);
             }
 
             $clearStmt = $connection->prepare('DELETE FROM pannier WHERE mail_login = :login');

@@ -188,7 +188,7 @@ $codes_promo = $connection->query('SELECT * FROM code_promo ORDER BY code')->fet
                         <div class="table-responsive">
                             <table class="table table-sm">
                                 <thead>
-                                    <tr><th>Code</th><th>Réduction</th><th>Expiration</th><th>Utilisations</th></tr>
+                                    <tr><th>Code</th><th>Réduction</th><th>Expiration</th></tr>
                                 </thead>
                                 <tbody>
                                 <?php foreach ($codes_promo as $code): ?>
@@ -196,7 +196,6 @@ $codes_promo = $connection->query('SELECT * FROM code_promo ORDER BY code')->fet
                                         <td><?php echo htmlspecialchars($code['code']); ?></td>
                                         <td><?php echo $code['reduction']; ?>%</td>
                                         <td><?php echo $code['date_expiration']; ?></td>
-                                        <td><?php echo $code['max_utilisations']; ?> max</td>
                                     </tr>
                                 <?php endforeach; ?>
                                 </tbody>
@@ -205,7 +204,6 @@ $codes_promo = $connection->query('SELECT * FROM code_promo ORDER BY code')->fet
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

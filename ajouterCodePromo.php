@@ -25,6 +25,9 @@ $codes_promo = $connection->query('SELECT * FROM code_promo ORDER BY code')->fet
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <h1 class="h3 mb-4">Ajouter un code promo</h1>
+                        <?php if (isset($_GET['erreur'])): ?>
+                            <div class="alert alert-danger">Ce code promo existe déjà.</div>
+                        <?php endif; ?>
                         <form method="post" action="addCodePromo.php">
                             <div class="mb-3">
                                 <label for="code" class="form-label">Code promo</label>
@@ -38,10 +41,6 @@ $codes_promo = $connection->query('SELECT * FROM code_promo ORDER BY code')->fet
                             <div class="mb-3">
                                 <label for="date_expiration" class="form-label">Date d'expiration</label>
                                 <input type="date" class="form-control" id="date_expiration" name="date_expiration" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="max_utilisations" class="form-label">Nombre max d'utilisations</label>
-                                <input type="number" class="form-control" id="max_utilisations" name="max_utilisations" min="1" value="1" required>
                             </div>
                             <button type="submit" class="btn btn-success">Ajouter le code promo</button>
                             <a href="BackOffice.php" class="btn btn-outline-secondary ms-2">Retour au back office</a>
@@ -59,8 +58,7 @@ $codes_promo = $connection->query('SELECT * FROM code_promo ORDER BY code')->fet
                                     <li class="list-group-item">
                                         <?php echo htmlspecialchars($code['code']); ?> — 
                                         <?php echo $code['reduction']; ?>% — 
-                                        Expire le <?php echo $code['date_expiration']; ?> — 
-                                        <?php echo $code['nb_utilisations']; ?>/<?php echo $code['max_utilisations']; ?> utilisations
+                                        Expire le <?php echo $code['date_expiration']; ?>
                                     </li>
                                 <?php endforeach; ?>
                             </ul>
