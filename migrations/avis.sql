@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS avis (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  mail_login VARCHAR(191) NOT NULL,
+  reference VARCHAR(50) NOT NULL,
+  note INT NOT NULL,
+  commentaire TEXT,
+  date_avis DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY (mail_login, reference)
+);
