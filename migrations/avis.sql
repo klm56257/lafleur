@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS avis (
   commentaire TEXT,
   date_avis DATETIME DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY (mail_login, reference)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

@@ -21,8 +21,8 @@ $aAchete = false;
 if ($produit) {
     $avisStmt = $connection->prepare(
         'SELECT a.*, u.nom, u.prenom FROM avis a
-         JOIN utilisateur u ON a.mail_login = u.mail_login
-         WHERE a.reference = ?
+         JOIN utilisateur u ON a.mail_login COLLATE utf8mb4_0900_ai_ci = u.mail_login
+         WHERE a.reference COLLATE utf8mb4_0900_ai_ci = ?
          ORDER BY a.date_avis DESC'
     );
     $avisStmt->execute([$ref]);
@@ -34,7 +34,7 @@ if ($produit) {
 
     if ($login) {
         // A déjà laissé un avis ?
-        $dejaAvisStmt = $connection->prepare('SELECT id FROM avis WHERE mail_login = ? AND reference = ?');
+        $dejaAvisStmt = $connection->prepare('SELECT id FROM avis WHERE mail_login COLLATE utf8mb4_0900_ai_ci = ? AND reference COLLATE utf8mb4_0900_ai_ci = ?');
         $dejaAvisStmt->execute([$login, $ref]);
         $dejaAvis = (bool)$dejaAvisStmt->fetch();
 
